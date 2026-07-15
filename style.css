@@ -1,0 +1,42 @@
+html, body {
+  margin: 0;
+  padding: 20px;
+}
+
+canvas {
+  display: block;
+}
+
+#cvs {
+  background-color: rgb(206, 208, 92);
+  width: 400px;
+  margin: 10px auto auto auto;
+  border: 3px solid green;
+  /*position: fixed; */
+}
+
+#container {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 20px;
+  margin-top: 10px;
+  padding: 0 20px;
+  /* Left and right padding for the whole container */
+  width: 100%;
+  box-sizing: border-box; /* Include padding in width calculation */
+  /*border: 1px solid red;*/ /*for debugging */
+}
+
+#Div1 {
+  border: 1px solid green;
+  padding: 10px;
+  flex: 1;
+  /* This makes it take up all available space */
+  min-height: 100px;
+  box-sizing: border-box;
+  /* Optional: add a max-width so it doesn't get too wide */
+  max-width: calc(100%);
+  /* Leaves room for canvas + gap */
+  font-size: 1.2em;
+}

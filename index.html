@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Main</title>
+  <link rel="shortcut icon" href="libraries/drdrugus.ico" type="image/x-icon">
+  <link rel="stylesheet" type="text/css" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/p5@1.11.13/lib/p5.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/p5@1.11.13/lib/addons/p5.sound.min.js"></script>
+  <script>MathJax = { tex: { inlineMath: [["$", "$"], ["\(", "\)"]] } };</script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@4.1.0/tex-mml-chtml.js"></script>
+  <!-- <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" id="MathJax-script" async></script> -->
+</head>
+
+<body>
+  <h2>Moser's Circle Problem</h2>
+  <!-- Clear any output in Div2 -->
+  <button id="clearr">Clear Output</button>
+  <!-- Clear the Canvas Points -->
+   <button id="clrPOINTS">Clear Pts</button>
+   <button id="listPts">Show Points</button>
+   <button id="listSegs">Show Segs</button>
+   <button id="listIntersections">Show Intersections</button>
+   <button id="listRegions">Show Regions</button>
+
+
+  <div id="Div1">
+    <label name="numPts">n:</label>
+    <input id="numPts" type="num" value="2" size="5">
+  </div>
+
+
+
+  <div id="cvs">
+    <!-- Your p5.js canvas will go here. If you want it above the canvas, move this div to above the container.
+       if you want it below the canvas then move it below the container. -->
+  </div>
+  <div id="Div2">OUTPUT:</div>
+
+
+  <script src="util.js"></script>
+  <script src="main.js"></script>
+</body>
+<!-- use the following code in javascript (if needed) to force js display.  
+ if (window.MathJax) {MathJax.typeset();} -->
+
+</html>
