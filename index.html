@@ -16,20 +16,30 @@
 
 <body>
   <h2>Moser's Circle Problem</h2>
-  <!-- Clear any output in Div2 -->
-  <button id="clearr">Clear Output</button>
-  <!-- Clear the Canvas Points -->
-   <button id="clrPOINTS">Clear Pts</button>
-   <button id="listPts">Show Points</button>
-   <button id="listSegs">Show Segs</button>
-   <button id="listIntersections">Show Intersections</button>
-   <button id="listRegions">Awaits Implementation</button>
-
-
+  
   <div id="Div1">
+  A circle has $n$ points on its perimeter.
+  A chord connects every point to every other point. However, the 
+  points are arranged such that no three chords ever concur at a point.<br> 
+  Three questions.
+  <ol>
+  <li>How many chords are drawn for $n$ points? $\binom{n}{2}$</li>
+  <li>How many intersecting segments exist inside the circle perimeter? $\binom{n}{4}$</li>
+  <li>How many chord bounded regions exist for $n$ points? $\binom{n}{4} + \binom{n}{2} + 1$</li>
+  <li>How many Region edges exist for $n$ points. [See oeis.org A135565s]</li>
+  </ol>
     <label name="numPts">n:</label>
     <input id="numPts" type="num" value="2" size="5">
+    <output id="regionalEdges"></output>
   </div>
+
+  <button id="clearr">Clear Output</button> <!-- Clears any output in Div2 -->
+  <button id="clrPOINTS">Clear Pts</button> <!-- Clears the Canvas Points -->
+  <button id="listPts">Show Points</button>
+  <button id="listSegs">Show Segs</button>
+  <button id="listIntersections">Show Intersections</button>
+  <button id="listRegions">Awaits Implementation</button>
+  <button id="listEdges">Print edges</button>
 
 
 
@@ -38,9 +48,8 @@
        if you want it below the canvas then move it below the container. -->
   </div>
   <div id="Div2">OUTPUT:</div>
-
+  <script src="PlanarGraph.js"></script>
   <script src="func.js"></script>
-  <script src="sweepLineSpecific.js"></script>
   <script src="util.js"></script>
   <script src="main-o.js"></script>
 </body>

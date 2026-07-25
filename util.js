@@ -14,6 +14,25 @@ function appendHTML(myDiv, stuffToAdd) {
   document.getElementById('Div1').scrollIntoView({ behavior: 'smooth' });
 }
 
+/*P is a point P[0],P[1] for x,y.  Q and point likewise
+This returns the perpendicular distance for point to line PQ. */
+function dist2LinePQ(P, Q, point) {
+  let Qx = Q[0];
+  let Qy = Q[1];
+  let Px = P[0];
+  let Py = P[1];
+  let x = point[0];
+  let y = point[1];
+  let ux = Qx - Px; //direction P to Q
+  let uy = Qy - Py;
+  let upx = -uy; //perpendicular vectors
+  let upy = ux;
+  //vx and vy are the perpendicular direction vector components
+  let vx = upx * (((Px - x) * upx + (Py - y) * upy) / (upx * upx + upy * upy));
+  let vy = upy * (((Px - x) * upx + (Py - y) * upy) / (upx * upx + upy * upy));
+  return Math.sqrt(vx * vx + vy * vy);
+}
+
 document.getElementById("clearr").addEventListener("click", () => {  //clears Output in Div2
   document.getElementById('Div2').innerHTML = "";
 
@@ -22,14 +41,17 @@ document.getElementById("clearr").addEventListener("click", () => {  //clears Ou
 document.getElementById("numPts").addEventListener("change", () => {  //sets the number of points
   n = parseFloat(document.getElementById("numPts").value);
   intersections=[]; //clear the old intersections
+  edgeArray = []; //clear the prior edgeArray
+  numEdges = A135565(n);
+  document.getElementById("regionalEdges").innerHTML = `Total Regional Edges will be ${numEdges}`;
   create_n_Points(n);
 });
 
 document.getElementById("clrPOINTS").addEventListener("click", () => { //resets pts and intersections to zero
   document.getElementById("numPts").value = parseInt(0);
   pts = [];
-  allIntersections = [];
   intersections = [];
+  edgeArray=[];
   n = 0;
 });
 
@@ -76,7 +98,6 @@ document.getElementById("listIntersections").addEventListener("click", () => {
           segments[j][2],
           segments[j][3]
         );
-        //allIntersections.push(IP);
         //compute distance IP to circle center
         let x = IP[0];
         let y = IP[1];
@@ -84,7 +105,7 @@ document.getElementById("listIntersections").addEventListener("click", () => {
         //compute distance IP to circle edge
         let close = Math.abs(d - r) //r is a global
         //is close less than epsilon?
-        if (close > epsilon) { intersections.push([x, y]) }
+        if (close > epsilon) { intersections.push([x, y]) } //this line adds an intersection point
       } //end if
     } //end on for j
   } //end on for i
@@ -99,14 +120,19 @@ document.getElementById("listIntersections").addEventListener("click", () => {
     appendHTML("Div2", `${sum}  ${item[0]}, ${item[1]}`);
   });
 
+  createEdges();  //since we have intersections, we can have edges
+
 });
 
-
+document.getElementById("listEdges").addEventListener("click",()=>{
+  appendHTML("Div2",`edgeArray`);
+  for(let i=0; i<edgeArray.length; ++i){
+    appendHTML("Div2",`[${edgeArray[i]}]`)
+  }
+});
 
 document.getElementById("listRegions").addEventListener("click", () => {
   // for (let i = 0; i < regions.length; ++i) {
-
-  //     console.log(`${i}: (${allIntersections[i][0]} ,${allIntersections[i][1]})`);
 
   // }
   console.log(regions);
