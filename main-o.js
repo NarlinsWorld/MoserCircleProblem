@@ -16,7 +16,7 @@ let n = parseFloat(document.getElementById("numPts").value); //index.html defaul
 let theta;
 let segments = [];
 let edgeArray = [];
-let pts = [];
+//let pts = [];
 let v = []; //data structure vertex
 let center;
 let intersections = [];
@@ -66,40 +66,38 @@ function draw() {
   }
 }
 
-function create_n_Points(n) {
-  /* Each pt is made of x,y. pt[0][0] = pt[ptnumber][x] and pt[0][1] = pt[ptnumber][y]  */
-  pts = []; //clear the point array
-  v = [];   //clear the vertex array
-  center = [width / 2, height / 2]; //center of the big circle
-
-  //Symmetrically distribute points around the big circle
-  for (let i = 0; i < n; ++i) {
-    theta = i * 2 * Math.PI / n;
-    pts.push([center[0] + r * Math.cos(theta), center[1] + r * Math.sin(theta)])
-  }
-
-  // add pts to PlanarGraph data structure DO NOT ADD THE SEGMENTS. THEY ARE NOT EDGES.
-  for (let i = 0; i < pts.length; ++i) {
-    let vxy = new Vertex(pts[i][0], pts[i][1])
-    v.push(vxy);
-  }
-
-  segments = [];
-  createSegments();
-
-}
-
 //These are the segments between points on the circle.
-function createSegments() {
-  /* Each segment is composed of 4 values: segments[strtPtNum][x], [strtPtNum][y], [endPtNum][x], [endPtNum][y]  */
-  for (let i = 0; i < pts.length - 1; ++i) {
-    for (let j = i + 1; j < pts.length; ++j) {
-      segments.push([pts[i][0], pts[i][1], pts[j][0], pts[j][1]]) //start pt of seg and end pt of segment
+
+function create_n_Points(n) {
+    v = [];
+    center = [width / 2, height / 2];
+    for (let i = 0; i < n; i++) {
+        const theta = i * 2 * Math.PI / n;
+        const x = center[0] + r * Math.cos(theta);
+        const y = center[1] + r * Math.sin(theta);
+        v.push(new Vertex(x, y));
     }
-  }
+    segments = [];
+    createSegments();
 }
+
+
 
 //These too are the segments between points on the circle.  They are long and there are binom(n,2) of them
+
+function createSegments() {
+    segments = [];
+
+    for (let i = 0; i < v.length - 1; i++) {
+        for (let j = i + 1; j < v.length; j++) {
+            segments.push([
+                v[i].x, v[i].y,
+                v[j].x, v[j].y
+            ]);
+        }
+    }
+}
+
 function drawSegments() {
   for (let i = 0; i < segments.length; ++i) {
     line(segments[i][0], segments[i][1], segments[i][2], segments[i][3]); //use P5 line() function
@@ -127,7 +125,7 @@ function createEdges() {
       } //end if
     } //end for j
     tempInts = sortPointsByDistance(tempInts);//sort the tempInts that are on segment i by distance to P
-    if (tempInts.length > 0) { console.log(`tempInts:`, tempInts); }
+    //if (tempInts.length > 0) { console.log(`tempInts:`, tempInts); }
     //tempInts has some points that are identical up to epsilon. We need to remove those.
     tempInts = removeRedundantPairs(tempInts);
     
@@ -154,18 +152,18 @@ function createEdges() {
       for (let k = 0; k < tempInts.length - 1; ++k) {
         edgeArray.push([tempInts[k][0], tempInts[k][1], tempInts[k + 1][0], tempInts[k + 1][1]]);
       }
-      console.log(`edgeArray.length is ${edgeArray.length}`); // & expected is ${}
-      console.log(edgeArray);
+      //console.log(`edgeArray.length is ${edgeArray.length}`); // & expected is ${}
+      //console.log(edgeArray);
 
     }
-    console.log(""); //separate the segments  
+    //console.log(""); //separate the segments  
   }
   //-----add the circular egdes
-  for (let k = 0; k < pts.length - 1; ++k) {
-    edgeArray.push([pts[k][0], pts[k][1], pts[k + 1][0], pts[k + 1][1]]);
+  for (let k = 0; k < v.length - 1; ++k) {
+    edgeArray.push([v[k].x, v[k].y, v[k + 1].x, v[k + 1].y]);
   }
   //add the last circular edge.
-  edgeArray.push([pts[pts.length - 1][0], pts[pts.length - 1][1], pts[0][0], pts[0][1]]);
+  edgeArray.push([v[v.length - 1].x, v[v.length - 1].y, v[0].x, v[0].y]);
   //-----
   console.log(`Final edge count = ${edgeArray.length}`);
   console.log(edgeArray);
