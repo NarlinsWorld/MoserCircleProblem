@@ -111,9 +111,6 @@ document.getElementById("listIntersections").addEventListener("click", () => {
   } //end on for i
   /*Go thru the intersections and remove duplicates */
   let uniqueIntersections = [];
-  for (let i=0; i<intersections.length; ++i){
-    
-  }
   sum=0 // for showing the count of intersection in the output
   intersections.forEach((item) => {
     ++sum;
