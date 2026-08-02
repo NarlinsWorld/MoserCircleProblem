@@ -40,3 +40,14 @@ canvas {
   /* Leaves room for canvas + gap */
   font-size: 1.2em;
 }
+button{ 
+  background: rgb(0, 251, 255);
+}
+
+#toggleTXT {
+  background: rgb(1, 254, 1);
+}
+
+#togglePts {
+  background:rgb(1, 254, 1);
+}

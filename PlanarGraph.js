@@ -1,22 +1,23 @@
 class Vertex {
-    constructor(x, y) {
+    constructor(id, x, y) {
+        this.id = id;
         this.x = x;
         this.y = y;
         this.edges = [];
     }
 }
-//Addressing Schemes for v= new Vertex(x,y)
+//Addressing Schemes for v= new Vertex(id,x,y)
 /*
   for (let item of v){
-  console.log(`item = ${item.x},${item.y}`);
+  console.log(`item = ${item.id}, ${item.x},${item.y}`);
 }
   
   v.forEach(item => {
-  console.log(`item = ${item.x},${item.y}`);
+  console.log(`item = ${item.id}, ${item.x},${item.y}`);
   });
 
   for(let i=0; i<v.length; ++i){
-    console.log(`v[i]=${v[i].x}, ${v[i].y}`);
+    console.log(`v[i]=${v[i].id}, ${v[i].x}, ${v[i].y}`);
   }
     */
 
@@ -30,6 +31,73 @@ class HalfEdge {
             to.y - from.y,
             to.x - from.x
         );
+    }
+
+    toString() {
+        const deg = (this.angle * 180 / Math.PI).toFixed(2);
+        return `HalfEdge from (${this.from.x},${this.from.y}) to (${this.to.x},${this.to.y}) [${deg}°]`;
+    }
+    /*const edge = new HalfEdge(v1, v2);
+    console.log(edge.toString()); // readable output */
+}
+
+class Segment {
+    constructor(a, b) {
+        this.a = a;
+        this.b = b;
+        this.intersections = [];   // we'll use this later
+    }
+
+    addIntersection(v, t) {
+        if (!this.intersections.some(item => item.vertex === v)) {
+            this.intersections.push(new SegmentPoint(v, t));
+        }
+    }
+
+    sortIntersections() {
+        this.intersections.sort((a, b) => a.t - b.t);
+    }
+
+    makeEdges() {
+        this.sortIntersections();
+
+        for (let i = 0; i < this.intersections.length - 1; i++) {
+
+            const v1 = this.intersections[i].vertex;
+            const v2 = this.intersections[i + 1].vertex;
+            //---- debug
+            if (dist(v1.x,v1.y,v2.x,v2.y)<=epsilon ) {
+                console.log(
+                    `Degenerate edge on segment ${this.a.id}-${this.b.id} at j=${i}`);
+
+                console.log(
+                    `Duplicate consecutive vertex ${v1.id} on segment ${this.a.id}-${this.b.id}`);
+            }
+            //---- end debug
+
+            // create the two half-edges here
+            const e1 = new HalfEdge(v1, v2);
+            const e2 = new HalfEdge(v2, v1);
+            e1.twin = e2;
+            e2.twin = e1;
+            v1.edges.push(e1);
+            v2.edges.push(e2);
+            cnt += 2; //cnt will be global. its a count of half edges
+        }
+
+    }
+
+    //not used
+    length() {
+        return dist(this.a.x, this.a.y,
+            this.b.x, this.b.y);
+    }
+}
+
+class SegmentPoint {
+    constructor(vertex, t) {
+        this.vertex = vertex;
+        this.t = t;
     }
 }
 
@@ -53,15 +121,33 @@ function nextEdge(edge) {
 function traceFace(start) {
     const poly = [];
     let e = start;
-    while (!e.visited) {
+    do {
         e.visited = true;
         poly.push(e.from);
         e = nextEdge(e);
-    }
+    } while (e !== start);
     return poly;
 }
 
+function traceAllFaces() {
+    const faces = [];
+    for (const vertex of allVertices) {
+        for (const edge of vertex.edges) {
+            if (!edge.visited) {
+                const face = traceFace(edge);
+                faces.push(face);
 
+                /* debug output to see the face coordinates  */
+                console.log(
+                    `Face ${faces.length}: ` +
+                    face.map(v => `V${v.id}`).join(" → ") +
+                    ` → V${face[0].id}`
+                );
+            }
+        }
+    }
+    return faces;
+}
 
 /* REMOVE THE EXTERIOR */
 function area(poly) {
@@ -73,40 +159,3 @@ function area(poly) {
     }
     return A / 2;
 }
-
-//===================================== not part of any fuction ========
-//js
-/* SORT NEIGHBORS */
-/*
-for (const v of vertices) {
-    v.edges.sort((a, b) => a.angle - b.angle);
-}
-
-// ENUMERATE EVERY FACE 
-//Every directed edge belongs to exactly one face, so every face is found exactly once.
-
-const faces = [];
-for (const v of vertices) {
-    for (const e of v.edges) {
-        if (!e.visited) {
-            const face = traceFace(e);
-            if (face.length >= 3)
-                faces.push(face);
-        }
-    }
-}
-
-
-//js
-let outside = 0;
-let max = 0;
-for (let i = 0; i < faces.length; i++) {
-    const a = Math.abs(area(faces[i]));
-    if (a > max) {
-        max = a;
-        outside = i;
-    }
-}
-faces.splice(outside, 1);
-console.log(faces.length);
-*/

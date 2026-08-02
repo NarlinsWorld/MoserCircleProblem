@@ -14,6 +14,16 @@ function appendHTML(myDiv, stuffToAdd) {
   document.getElementById('Div1').scrollIntoView({ behavior: 'smooth' });
 }
 
+//this modifies arr in place when it is an array of pairs [[a1,b1],[a2,b2],...]
+function sortLexicographically(arr) {
+  return arr.sort((a, b) => {
+    if (a.x !== b.x) {
+      return a.x - b.x;
+    }
+    return a.y - b.y;
+  });
+}
+
 /*P is a point P[0],P[1] for x,y.  Q and point likewise
 This returns the perpendicular distance for point to line PQ. */
 function dist2LinePQ(P, Q, point) {
@@ -33,106 +43,244 @@ function dist2LinePQ(P, Q, point) {
   return Math.sqrt(vx * vx + vy * vy);
 }
 
-document.getElementById("clearr").addEventListener("click", () => {  //clears Output in Div2
-  document.getElementById('Div2').innerHTML = "";
+document.getElementById("clearr").addEventListener("click", () => {
+  document.getElementById('Div2').innerHTML = "";//clears Output in Div2
+  document.getElementById('Div1a').innerHTML = "";//clears Special Ouput.
 
 });
 
-document.getElementById("numPts").addEventListener("change", () => {  //sets the number of points
-  n = parseFloat(document.getElementById("numPts").value);
-  intersections=[]; //clear the old intersections
-  edgeArray = []; //clear the prior edgeArray
-  numEdges = A135565(n);
-  document.getElementById("regionalEdges").innerHTML = `Total Regional Edges will be ${numEdges}`;
-  create_n_Points(n);
-});
+//1. Accepts User input for the number of perimeter points.
+document.getElementById("numPts").addEventListener("change", change_numPts); //sets the number of points
 
-document.getElementById("clrPOINTS").addEventListener("click", () => { //resets pts and intersections to zero
-  document.getElementById("numPts").value = parseInt(0);
-  pts = [];
-  intersections = [];
-  edgeArray=[];
-  n = 0;
-});
 
-document.getElementById("listPts").addEventListener("click", () => {
-  if (pts.length > 0) {
-    for (let i = 0; i < pts.length; ++i) {
-      appendHTML("Div2", `(${pts[i][0].toFixed(2)}, ${pts[i][1].toFixed(2)})`)
-    }
+
+
+
+document.getElementById("toggleTXT").addEventListener("click", () => {
+  const button = document.getElementById("toggleTXT");
+  if (button.dataset.toggled === "true") {
+    // Turn OFF
+    button.style.backgroundColor = 'rgb(1, 254, 1)';
+    button.style.color = 'black'; // Reset text color
+    button.dataset.toggled = "false";
+    //console.log(`State: OFF`);
+  } else {
+    // Turn ON
+    button.style.backgroundColor = 'red';
+    button.style.color = 'white';
+    button.dataset.toggled = "true";
+    //console.log(`State: ON`);
   }
 });
 
-//writes the segments to the output each segment is one row.
-document.getElementById("listSegs").addEventListener("click", () => {
-  if (segments.length > 0) {
-    appendHTML("Div2", 'Segments')
-    for (let i = 0; i < segments.length; ++i) {
-      appendHTML("Div2", `${i}.&nbsp; (${segments[i][0].toFixed(1)}, ${segments[i][1].toFixed(1)}, ${segments[i][2].toFixed(1)}, ${segments[i][3].toFixed(1)})`)
-    }
+document.getElementById("togglePts").addEventListener("click", () => {
+  const button = document.getElementById("togglePts");
+
+  if (button.dataset.toggled === "true") {
+    button.style.backgroundColor = 'rgb(0,254,0)';
+    button.style.color = "black";
+    button.dataset.toggled = "false";
+    //console.log(`State: ON`);
+  } else {
+    // Turn ON
+    button.style.backgroundColor = 'red';
+    button.style.color = 'white';
+    button.dataset.toggled = "true";
+    //console.log(`State: OFF`);
   }
 });
 
-/* Show Intersections Button
+
+
+/* Show Intersections Button 
+The LISTENER: Re-COMPUTES THE INTERSECTION POINTS.
 This Listener will plot intersection points on the graph
 1. Cycle through all segment pairs and ask ?hasIntersection. The return will be true or false
-2. If true, Point = intersectionPoint(P1x,P1y,P2x,P2y,Q1x,Q1y,Q2x,Q2y)
+2. If true, Point = intersectionPoint(seg1,seg2)
 3. Save the point into intersections[x,y]
 4. if intersections have been shown, they are plotted by draw()
 */
 document.getElementById("listIntersections").addEventListener("click", () => {
+  let found = false;
+  for (const seg of segments) {
+    if (seg.intersections.length > 0) { found = true; }
+  }
+  if (!found) { findIntersections(); }
   document.getElementById('Div2').innerHTML = ""; //clears Div2
-  intersections = []; //clear the array first
-  appendHTML("Div2","Showing Intersections")
-  for (let i = 0; i < segments.length; ++i) {
-    for (let j = i + 1; j < segments.length; ++j) {
-      let intersectTF = hasIntersect(segments[i], segments[j]);
-      if (intersectTF) {
-        let IP = intersectionPoint(
-          segments[i][0],
-          segments[i][1],
-          segments[i][2],
-          segments[i][3],
-          segments[j][0],
-          segments[j][1],
-          segments[j][2],
-          segments[j][3]
-        );
-        //compute distance IP to circle center
-        let x = IP[0];
-        let y = IP[1];
-        let d = Math.sqrt((x - center[0]) ** 2 + (y - center[1]) ** 2);
-        //compute distance IP to circle edge
-        let close = Math.abs(d - r) //r is a global
-        //is close less than epsilon?
-        if (close > epsilon) { intersections.push([x, y]) } //this line adds an intersection point
-      } //end if
-    } //end on for j
-  } //end on for i
-  /*Go thru the intersections and remove duplicates */
-  let uniqueIntersections = [];
-  sum=0 // for showing the count of intersection in the output
-  intersections.forEach((item) => {
+  appendHTML("Div2", "Showing Intersections")
+  sum = 0; // for showing the count of intersection in the output
+  allVertices.forEach((item) => {
     ++sum;
-    appendHTML("Div2", `${sum}  ${item[0]}, ${item[1]}`);
+    appendHTML("Div2", `${sum}.  (${parseFloat(item.x.toFixed(1))}, ${parseFloat(item.y.toFixed(1))})`);
   });
-
-  createEdges();  //since we have intersections, we can have edges
-
 });
 
-document.getElementById("listEdges").addEventListener("click",()=>{
-  appendHTML("Div2",`edgeArray`);
-  for(let i=0; i<edgeArray.length; ++i){
-    appendHTML("Div2",`[${edgeArray[i]}]`)
+
+
+
+
+document.getElementById("listAllVertices").addEventListener("click", () => {
+  for (let i = 0; i < allVertices.length; i++) {
+    const p = allVertices[i];
+    appendHTML(
+      "Div2",
+      `${i}: (${p.x.toFixed(1)}, ${p.y.toFixed(1)})`
+    );
   }
 });
 
-document.getElementById("listRegions").addEventListener("click", () => {
-  // for (let i = 0; i < regions.length; ++i) {
+document.getElementById("listEdgesByVertex").addEventListener("click", () => {
 
-  // }
-  console.log(regions);
+  let edgecnt = 0; //edge count
+  for (const p of allVertices) {
+    const degree = p.edges.length;
+    appendHTML(
+      "Div2",
+      `${p.id}. Vertex (${p.x.toFixed(1)}, ${p.y.toFixed(1)}) &nbsp; Graph Degree = ${degree}`
+    );
+
+    for (const e of p.edges) {
+      ++edgecnt
+      appendHTML(
+        "Div2",
+        `&nbsp;&nbsp;→ (${e.to.id} &nbsp;&nbsp;Angle = ${(e.angle * 180 / Math.PI).toFixed(1)}°`
+      );
+    }
+  }
+  appendHTML("Div2", `<br>Total HalfEdges = ${edgecnt}`);
 });
 
+document.getElementById("listHighDegreeVertices").addEventListener("click", () => {
+
+  for (const p of allVertices) {
+
+    const degree = p.edges.length;
+
+    if (degree <= 4 ^ p.id < n)
+      continue;
+
+    appendHTML(
+      "Div2",
+      `<b>${p.id}</b> Degree = ${degree}
+       &nbsp;&nbsp;(${p.x.toFixed(2)}, ${p.y.toFixed(2)})`
+    );
+  }
+
+});
+
+
+//writes the segments to the output including the intersections on that segment.
+document.getElementById("listSegs").addEventListener("click", () => {
+  if (segments.length > 0) {
+
+    appendHTML("Div2", 'listSegments')
+    for (let i = 0; i < segments.length; ++i) {
+      appendHTML("Div2", `${i}.&nbsp; (${segments[i].a.x.toFixed(1)}, ${segments[i].a.y.toFixed(1)}, 
+      ${segments[i].b.x.toFixed(1)}, ${segments[i].b.y.toFixed(1)})`);
+      for (const p of segments[i].intersections) {
+        appendHTML("Div2", `&nbsp;&nbsp;&nbsp;&nbsp;(${p.vertex.x.toFixed(1)}, ${p.vertex.y.toFixed(1)},t=${p.t.toFixed(2)})`
+        );
+      }
+    }
+  }
+
+});
+
+
+
+//makeEdges event listener
+document.getElementById("makeEdges").addEventListener("click", makeEdges);
+
+
+
+
+
+document.getElementById("traceFace").addEventListener("click", () => {
+
+  // Make sure this is a fresh traversal.
+  for (const vertex of allVertices) {
+    for (const edge of vertex.edges) {
+      edge.visited = false;
+    }
+  }
+
+  reportGraphCounts(); //prints "before call" results
+
+
+  let faces = traceAllFaces();  //This function is in PlanarGraph.js
+  let No_Regions = binom(n, 4) + binom(n, 2) + 1; //if used, it is number of faces for odd n
+ 
+  appendHTML("Div1a", `--- After traceAllFaces ---`)
+  appendHTML("Div1a", `Euler Faces found = F = ${faces.length}&nbsp;&nbsp;  1>A007678 would be correct.`);
+  appendHTML("Div1a", `A007678 Expected faces = ${A007678(n)}`);
+  appendHTML("Div1a", `allVertices length = V = ${allVertices.length}`);
+  appendHTML("Div1a", `half edges cnt = ${cnt}`);
+  appendHTML("Div1a", `whole edge count = E = ${cnt / 2}`);
+  appendHTML("Div1a", `Euler check: V-E+F = ${allVertices.length}-${cnt / 2}+${faces.length} = ${allVertices.length - cnt / 2 + faces.length}`);
+  appendHTML("Div1a", "===================================");
+  appendHTML("Div1a", `&nbsp;&nbsp;&nbsp;&nbsp;`);
+});
+
+
+function reportGraphCounts() {
+  // Number of Vertex objects in the graph
+  const vertexCount = allVertices.length;
+  // Count the actual HalfEdge objects stored in the vertices.
+  let halfEdgeCount = 0;
+  // Count undirected edges by counting each HalfEdge/twin pair once.
+  const seen = new Set();
+  let undirectedEdgeCount = 0;
+  for (const vertex of allVertices) {
+    for (const edge of vertex.edges) {
+      ++halfEdgeCount;
+      if (!seen.has(edge)) {
+        ++undirectedEdgeCount;
+        seen.add(edge);
+        if (edge.twin !== null) {
+          seen.add(edge.twin);
+        }
+      }
+    }
+  }
+
+  appendHTML("Div1a", "========== GRAPH COUNTS ==========");
+  appendHTML("Div1a", `n = ${n}`)
+  appendHTML("Div1a", `Vertices       V = ${vertexCount} &nbsp;&nbsp;&nbsp;  Compare OEIS007569 = ${A007569(n)}`);
+  appendHTML("Div1a", `Half-edges         = ${halfEdgeCount}`);
+  appendHTML("Div1a", `Undirected edges E = ${undirectedEdgeCount} &nbsp;&nbsp;&nbsp; Compare OEISA135565= ${A135565(n)}`);
+  appendHTML("Div1a", `Global cnt         = ${cnt}`);
+  appendHTML("Div1a", `2E                 = ${2 * undirectedEdgeCount}`);
+  appendHTML("Div1a", `Sum of degrees     = ${halfEdgeCount}`);
+  appendHTML("Div1a", "---------");
+}
+
+
+function writeIndexNumber(x, y, txt) {
+  stroke("Black");
+  strokeWeight(1);
+  text(txt, x + 5, y + 5);
+  strokeWeight(5);
+  stroke("Red");
+}
+
+//Event listener for listAngles
+document.getElementById("listAngles").addEventListener("click", logAllEdgeAngles);
+
+function logAllEdgeAngles() {
+  //console.log("=== ALL HALF-EDGE ANGLES ===");
+  let total = 0;
+  for (const vertex of allVertices) {
+    for (const edge of vertex.edges) {
+      appendHTML(`Div2`,
+        // `From (${edge.from.x.toFixed(1)}, ${edge.from.y.toFixed(1)}) → ` +
+        // `To (${edge.to.x.toFixed(1)}, ${edge.to.y.toFixed(1)}) | ` +
+        // `Angle: ${edge.angle.toFixed(4)} ::: (${(edge.angle * 180 / Math.PI).toFixed(2)}°)`
+        `V${edge.from.id} → V${edge.to.id} : ` +
+        `${(edge.angle * 180 / Math.PI).toFixed(2)}°`
+      );
+      total++;
+    }
+  }
+  //console.log(`Total edges: ${total}`);
+}
 

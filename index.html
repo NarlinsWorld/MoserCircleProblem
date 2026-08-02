@@ -15,38 +15,52 @@
 </head>
 
 <body>
-  <h2>Moser's Circle Problem</h2>
-  
+  <h2>Moser's Circle Problem with a Regular n-gon</h2>
   <div id="Div1">
-  A circle has $n$ points on its perimeter.
-  A chord connects every point to every other point. However, the 
-  points are arranged such that no three chords ever concur at a point.<br> 
-  Three questions.
-  <ol>
-  <li>How many chords are drawn for $n$ points? $\binom{n}{2}$</li>
-  <li>How many intersecting segments exist inside the circle perimeter? $\binom{n}{4}$</li>
-  <li>How many chord bounded regions exist for $n$ points? $\binom{n}{4} + \binom{n}{2} + 1$</li>
-  <li>How many Region edges exist for $n$ points. [See oeis.org A135565s]</li>
-  </ol>
+    A regular $n$-gon is inscribed in a circle. A chord connects every point to every other point.
+    The 'regular' n-gon permits high degree intersections.
+    <ul>
+      <li>How many chords are drawn for $n$ points? $\binom{n}{2}=$ <span id="numchords"></span></li>
+      </li>
+      <li>How many intersections including perimeter points? = <span id="a7569"></span></li>
+      <li>Regions, (A007678) = <span id="a7678"></span> + (<span id="currentn"></span> arc Regions) = <span
+          id="a7678plusn"></span></li>
+    </ul>
+
     <label name="numPts">n:</label>
-    <input id="numPts" type="num" value="2" size="5">
+    <input id="numPts" type="num" value="3" size="5" style="background: yellow;">
     <output id="regionalEdges"></output>
+    <output id="halfEdgeCnt"></output>
   </div>
 
   <button id="clearr">Clear Output</button> <!-- Clears any output in Div2 -->
-  <button id="clrPOINTS">Clear Pts</button> <!-- Clears the Canvas Points -->
-  <button id="listPts">Show Points</button>
-  <button id="listSegs">Show Segs</button>
+  
+  
   <button id="listIntersections">Show Intersections</button>
-  <button id="listRegions">Awaits Implementation</button>
-  <button id="listEdges">Print edges</button>
+  <button id="listSegs">listsSegs</button>
+  
+  <button id="makeEdges">makeEdges</button> <!-- util.js createEdges is in main-o.js -->
+  <button id="traceFace" style="background:rgb(38,255,0);">TraceFace</button>
+  <button id="listEdges">unused</button>
+  <br>
+  <button id="listAllVertices">list All Vertices</button>
+  <button id="listEdgesByVertex">list Edges<br>by Vertex</button>
+  <button id="listHighDegreeVertices">HighDegree<br>Vertices</button>
+  <button id="listAngles">listAngles</button>
 
 
+  <div id="container">
+    <div id="leftside">
+      <button id="toggleTXT" data-toggled="false">toggle<br>labels</button>
+      <button id="togglePts" data-toggled="false">toggle<br>points</button>
+    </div>
 
-  <div id="cvs">
-    <!-- Your p5.js canvas will go here. If you want it above the canvas, move this div to above the container.
+    <div id="cvs">
+      <!-- Your p5.js canvas will go here. If you want it above the canvas, move this div to above the container.
        if you want it below the canvas then move it below the container. -->
+    </div>
   </div>
+  <div id="Div1a">Special</div>
   <div id="Div2">OUTPUT:</div>
   <script src="PlanarGraph.js"></script>
   <script src="func.js"></script>
