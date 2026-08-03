@@ -207,9 +207,9 @@ document.getElementById("traceFace").addEventListener("click", () => {
   reportGraphCounts(); //prints "before call" results
 
 
-  let faces = traceAllFaces();  //This function is in PlanarGraph.js
+  traceAllFaces();  //This function is in PlanarGraph.js
   let No_Regions = binom(n, 4) + binom(n, 2) + 1; //if used, it is number of faces for odd n
- 
+
   appendHTML("Div1a", `--- After traceAllFaces ---`)
   appendHTML("Div1a", `Euler Faces found = F = ${faces.length}&nbsp;&nbsp;  1>A007678 would be correct.`);
   appendHTML("Div1a", `A007678 Expected faces = ${A007678(n)}`);
@@ -284,3 +284,52 @@ function logAllEdgeAngles() {
   //console.log(`Total edges: ${total}`);
 }
 
+document.getElementById("facePointerVerification").addEventListener("click", () => {
+  for (const v of allVertices) {
+    for (const e of v.edges) {
+      console.log(
+        `V${e.from.id} -> V${e.to.id} belongs to Face ${e.face.id}`
+      );
+    }
+  }
+});
+
+document.getElementById("showFaceArea").addEventListener("click", () => {
+  let minArea = width * height;
+  let maxArea = 0
+  let fläche
+  for (const face of faces) {
+    fläche = area(face);
+    if (fläche < minArea && fläche > epsilon) { minArea = fläche }
+    if (fläche > maxArea) { maxArea = fläche }
+    //console.log(face.id, area(face));
+  }
+  console.log(`min Area = ${minArea}`)
+  console.log(`max Area = ${maxArea}`)
+  let extF = faces.find(face => area(face) < 0);
+  //let extF = extFace(); //OK, just not needed
+  let oberfläche = area(extF);
+  console.log(`The exterior face is id: ${extF.id} and has area ${oberfläche}`);
+});
+
+document.getElementById("faceVertices").addEventListener("click", () => {
+  for (const face of faces) {
+    // console.log(             //verification no longer needed.
+    //   `Face ${face.id}: `
+    //   + `${face.vertices.length} vertices, `
+    //   + `${face.edges.length} edges`
+    // );
+    appendHTML("Div2",`${face.toString()}`);
+  }
+});
+
+document.getElementById("seeNeighbors").addEventListener("click", ()=>{
+  buildDualGraph();
+  for (const face of faces) {
+    console.log(
+        `Face ${face.id}: neighbors = ${
+            face.neighbors.map(f => f.id).join(", ")
+        }`
+    );
+}
+});

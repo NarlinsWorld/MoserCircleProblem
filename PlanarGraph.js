@@ -66,7 +66,7 @@ class Segment {
             const v1 = this.intersections[i].vertex;
             const v2 = this.intersections[i + 1].vertex;
             //---- debug
-            if (dist(v1.x,v1.y,v2.x,v2.y)<=epsilon ) {
+            if (dist(v1.x, v1.y, v2.x, v2.y) <= epsilon) {
                 console.log(
                     `Degenerate edge on segment ${this.a.id}-${this.b.id} at j=${i}`);
 
@@ -101,6 +101,43 @@ class SegmentPoint {
     }
 }
 
+class Face {
+
+    constructor(id) {
+        this.id = id;
+        this.vertices = [];
+        this.edges = [];
+        this.neighbors = [];
+        this.color = -1;
+    }
+
+    toString() {
+        return `Face ${this.id}: `
+            + this.vertices.map(v => `V${v.id}`).join(" → ")
+            + ` → V${this.vertices[0].id}`;
+    }
+
+    addNeighbor(otherFace) {
+        if (otherFace === this)
+            return;
+        if (!this.neighbors.includes(otherFace))
+            this.neighbors.push(otherFace);
+    }
+
+
+
+    trace(startEdge) {
+        let e = startEdge;
+        do {
+            e.visited = true;
+            e.face = this;
+            this.vertices.push(e.from);
+            this.edges.push(e);
+            e = nextEdge(e);
+        } while (e !== startEdge);
+    }
+}
+
 
 
 //Find the next edge
@@ -118,40 +155,48 @@ function nextEdge(edge) {
 //Only one orientation give interior faces
 
 /* FACE TRAVERSAL */
+
 function traceFace(start) {
-    const poly = [];
+    const face = new Face(nextFaceId++);
     let e = start;
     do {
         e.visited = true;
-        poly.push(e.from);
+        e.face = face;  //this line is the face pointer
+        face.vertices.push(e.from);
+        face.edges.push(e);
         e = nextEdge(e);
     } while (e !== start);
-    return poly;
+    return face;
 }
 
 function traceAllFaces() {
-    const faces = [];
+    faces = [];          // clear global array
+    nextFaceId = 0;
     for (const vertex of allVertices) {
         for (const edge of vertex.edges) {
             if (!edge.visited) {
                 const face = traceFace(edge);
                 faces.push(face);
-
-                /* debug output to see the face coordinates  */
-                console.log(
-                    `Face ${faces.length}: ` +
-                    face.map(v => `V${v.id}`).join(" → ") +
-                    ` → V${face[0].id}`
-                );
+                // console.log(
+                //     `Face ${face.id}: ` +
+                //     face.vertices.map(v => `V${v.id}`).join(" → ") +
+                //     ` → V${face.vertices[0].id}`
+                // );
             }
         }
     }
-    return faces;
+    //return faces;
 }
 
+
+
 /* REMOVE THE EXTERIOR */
-function area(poly) {
+
+//polygon area per shoeString method
+function area(face) {
     let A = 0;
+    const poly = face.vertices;
+    //console.log(poly);
     for (let i = 0; i < poly.length; i++) {
         const a = poly[i];
         const b = poly[(i + 1) % poly.length];
@@ -159,3 +204,28 @@ function area(poly) {
     }
     return A / 2;
 }
+
+
+
+//find exterior face
+const extFace = () => {
+    {
+        let fläche
+        for (const face of faces) {
+            fläche = area(face);
+            if (fläche < 0) { return face }
+        }
+        return null;
+    }
+}
+
+
+function buildDualGraph() {
+    for (const face of faces) {
+        face.neighbors = [];
+        for (const edge of face.edges) {
+            face.addNeighbor(edge.twin.face);
+        }
+    }
+}
+

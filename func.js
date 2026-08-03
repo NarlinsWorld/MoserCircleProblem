@@ -18,6 +18,7 @@ function change_numPts() {
   create_n_Points(n);
   findIntersections(); //basically, the real place where we make intersections
   makeEdges();
+  traceAllFaces();  //This function is in PlanarGraph.js
 }
 
 /* this is called from "change_numPts." 

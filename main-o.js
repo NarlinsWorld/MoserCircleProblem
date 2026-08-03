@@ -14,14 +14,16 @@
 let r = 350 / 2; //the canvas is 400x400 so this is a radius for the big circle.
 let n = parseFloat(document.getElementById("numPts").value); //index.html default is n=3
 let theta;
-let segments = []; //instance array of class Segment
 let v = []; //instance array of class Vertex to hold only original perimeter points
 let center;
+let segments = []; //instance array of class Segment
 let allVertices = []; //instance array of class Segment, every unique point in the planar graph
-let regions = [];
+let faces = [];
 let epsilon = 10 ** (-5);
+//global counters
 let cnt; //keeps up with a count of half edges.
 let nextVertexId = 0; //clear this before any new n 
+let nextFaceId = 0;
 
 function setup() {
   const cnvs = createCanvas(400, 400);
