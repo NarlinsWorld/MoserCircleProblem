@@ -24,27 +24,46 @@ let epsilon = 10 ** (-5);
 let cnt; //keeps up with a count of half edges.
 let nextVertexId = 0; //clear this before any new n 
 let nextFaceId = 0;
+let exteriorFace = null;
+let showFaceFill = true;
+let showSegments = true;
+let showVertices = true;
+let showVertexIds = true;
 
 function setup() {
   const cnvs = createCanvas(400, 400);
+  Face.palette = [
+    color(255,120,120),
+    color(120,255,120),
+    color(120,120,255),
+    color(255,255,120)
+];
   cnvs.parent('cvs');
   create_n_Points(n); //When points are created, segments are too.
-  change_numPts(); //fills in some blanks in HTML
+  change_numPts(); //fills in some blanks in HTML and "runs the whole program"
 }
 
 
 function draw() {
   background(250);
+  // draw the filled faces first
+  if (showFaceFill) {
+    for (const face of faces)
+      face.draw();
+  }
+
+  //now draw the graph edges over the top of it.
   noFill();
   circle(width / 2, height / 2, 2 * r); //the big circle
 
   stroke('black');
   strokeWeight(1)
-  if (segments.length > 0) {
-    drawSegments();  //draw and redraw edges
+
+  if (showSegments){
+    drawSegments();
   }
-  
-  plotAllVertices();
+ 
+    plotAllVertices();
 
 }
 

@@ -1,12 +1,16 @@
 function change_numPts() {
   //clear stuff first
-  v = []; //clears my point array, an instance of class Vector
   n = parseFloat(document.getElementById("numPts").value);
+  if(n<=2){
+    appendHTML("Div1",`<span style=color:red;>Too Few Points to calculate</span>`);
+    return
+  }
   allVertices = []; //clear the old intersections
   if (n > 2) {
     // let No_Regions = binom(n, 4) + binom(n, 2) + 1;
     // document.getElementById("cntRegions").innerHTML = No_Regions;
   }
+  v = []; //clears my point array, an instance of class Vector
   document.getElementById("numchords").innerHTML = binom(n, 2);
   document.getElementById("a7569").innerHTML = A007569(n);
   document.getElementById("a7678").innerHTML = A007678(n);
@@ -18,7 +22,9 @@ function change_numPts() {
   create_n_Points(n);
   findIntersections(); //basically, the real place where we make intersections
   makeEdges();
-  traceAllFaces();  //This function is in PlanarGraph.js
+  traceAllFaces();  //This function is in PlanarGraph.js   
+  removeExterior();
+  buildDualGraph();
 }
 
 /* this is called from "change_numPts." 
@@ -164,15 +170,13 @@ function sortAllVertexEdges() {
 }
 
 function plotAllVertices() {
-  const button1 = document.getElementById("togglePts"); //get intersection toggle state
-  const button = document.getElementById("toggleTXT"); //gets label toggle state
   strokeWeight(5);
   stroke("red");
   for (const v of allVertices) {
-    if (button1.dataset.toggled === "false") {
+    if (showVertices) {
       point(v.x, v.y);
     }
-    if (button.dataset.toggled === "false") {
+    if (showVertexIds) {
       writeIndexNumber(v.x, v.y, v.id);
     }
   }

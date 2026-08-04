@@ -53,42 +53,105 @@ document.getElementById("clearr").addEventListener("click", () => {
 document.getElementById("numPts").addEventListener("change", change_numPts); //sets the number of points
 
 
+document.getElementById("toggleTXT").onclick=()=>{
+    showVertexIds=!showVertexIds;
+    updateButton("toggleTXT",showVertexIds);
+};
 
+document.getElementById("togglePts").onclick=()=>{
+    showVertices=!showVertices;
+    updateButton("togglePts",showVertices);
+};
 
-
-document.getElementById("toggleTXT").addEventListener("click", () => {
-  const button = document.getElementById("toggleTXT");
-  if (button.dataset.toggled === "true") {
-    // Turn OFF
-    button.style.backgroundColor = 'rgb(1, 254, 1)';
-    button.style.color = 'black'; // Reset text color
-    button.dataset.toggled = "false";
-    //console.log(`State: OFF`);
-  } else {
-    // Turn ON
-    button.style.backgroundColor = 'red';
-    button.style.color = 'white';
-    button.dataset.toggled = "true";
-    //console.log(`State: ON`);
-  }
+document.getElementById("toggleColor").addEventListener("click",()=>{
+    showFaceFill = !showFaceFill;
+    updateButton("toggleColor",showFaceFill);
 });
 
-document.getElementById("togglePts").addEventListener("click", () => {
-  const button = document.getElementById("togglePts");
+document.getElementById("toggleSegs").onclick=()=>{
+    showSegments=!showSegments;
+    updateButton("toggleSegs",showSegments);
+};
 
-  if (button.dataset.toggled === "true") {
-    button.style.backgroundColor = 'rgb(0,254,0)';
-    button.style.color = "black";
-    button.dataset.toggled = "false";
-    //console.log(`State: ON`);
-  } else {
-    // Turn ON
-    button.style.backgroundColor = 'red';
-    button.style.color = 'white';
-    button.dataset.toggled = "true";
-    //console.log(`State: OFF`);
-  }
-});
+function updateButton(id,state){
+    const b=document.getElementById(id);
+    if(state){
+        b.style.backgroundColor="rgb(1,254,1)";
+        b.style.color="black";
+    }else{
+        b.style.backgroundColor="red";
+        b.style.color="white";
+    }
+}
+
+
+// document.getElementById("toggleTXT").addEventListener("click", () => {
+//   const button = document.getElementById("toggleTXT");
+//   if (button.dataset.toggled === "true") {
+//     // Turn OFF
+//     button.style.backgroundColor = 'rgb(1, 254, 1)';
+//     button.style.color = 'black'; // Reset text color
+//     button.dataset.toggled = "false";
+//     //console.log(`State: OFF`);
+//   } else {
+//     // Turn ON
+//     button.style.backgroundColor = 'red';
+//     button.style.color = 'white';
+//     button.dataset.toggled = "true";
+//     //console.log(`State: ON`);
+//   }
+// });
+
+// document.getElementById("togglePts").addEventListener("click", () => {
+//   const button = document.getElementById("togglePts");
+
+//   if (button.dataset.toggled === "true") {
+//     button.style.backgroundColor = 'rgb(0,254,0)';
+//     button.style.color = "black";
+//     button.dataset.toggled = "false";
+//     //console.log(`State: ON`);
+//   } else {
+//     // Turn ON
+//     button.style.backgroundColor = 'red';
+//     button.style.color = 'white';
+//     button.dataset.toggled = "true";
+//     //console.log(`State: OFF`);
+//   }
+// });
+
+// document.getElementById("toggleColor").addEventListener("click", () => {
+//   const button = document.getElementById("toggleColor");
+
+//   if (button.dataset.toggled === "true") {
+//     button.style.backgroundColor = 'rgb(0,254,0)';
+//     button.style.color = "black";
+//     button.dataset.toggled = "false";
+//     //console.log(`State: ON`);
+//   } else {
+//     // Turn ON
+//     button.style.backgroundColor = 'red';
+//     button.style.color = 'white';
+//     button.dataset.toggled = "true";
+//     //console.log(`State: OFF`);
+//   }
+// });
+
+// document.getElementById("toggleSegs").addEventListener("click", () => {
+//   const button = document.getElementById("toggleSegs");
+
+//   if (button.dataset.toggled === "true") {
+//     button.style.backgroundColor = 'rgb(0,254,0)';
+//     button.style.color = "black";
+//     button.dataset.toggled = "false";
+//     //console.log(`State: ON`);
+//   } else {
+//     // Turn ON
+//     button.style.backgroundColor = 'red';
+//     button.style.color = 'white';
+//     button.dataset.toggled = "true";
+//     //console.log(`State: OFF`);
+//   }
+// });
 
 
 
@@ -219,6 +282,8 @@ document.getElementById("traceFace").addEventListener("click", () => {
   appendHTML("Div1a", `Euler check: V-E+F = ${allVertices.length}-${cnt / 2}+${faces.length} = ${allVertices.length - cnt / 2 + faces.length}`);
   appendHTML("Div1a", "===================================");
   appendHTML("Div1a", `&nbsp;&nbsp;&nbsp;&nbsp;`);
+  removeExterior();
+  buildDualGraph();
 });
 
 
@@ -306,10 +371,14 @@ document.getElementById("showFaceArea").addEventListener("click", () => {
   }
   console.log(`min Area = ${minArea}`)
   console.log(`max Area = ${maxArea}`)
+  let kreisefläche = Math.PI * r ** 2;
+  console.log(`circle area = ${kreisefläche}`);
   let extF = faces.find(face => area(face) < 0);
-  //let extF = extFace(); //OK, just not needed
-  let oberfläche = area(extF);
-  console.log(`The exterior face is id: ${extF.id} and has area ${oberfläche}`);
+  if (extF != null) {
+    let oberfläche = area(extF);
+    console.log(`The exterior face is id: ${extF.id} and has area ${oberfläche}`);
+  }
+  console.log(`exterior face id and area are ${exteriorFace.id} = ${area(exteriorFace)} sq. units`)
 });
 
 document.getElementById("faceVertices").addEventListener("click", () => {
@@ -319,17 +388,16 @@ document.getElementById("faceVertices").addEventListener("click", () => {
     //   + `${face.vertices.length} vertices, `
     //   + `${face.edges.length} edges`
     // );
-    appendHTML("Div2",`${face.toString()}`);
+    appendHTML("Div2", `${face.toString()}`);
   }
 });
 
-document.getElementById("seeNeighbors").addEventListener("click", ()=>{
-  buildDualGraph();
+document.getElementById("seeNeighbors").addEventListener("click", () => {
+
   for (const face of faces) {
     console.log(
-        `Face ${face.id}: neighbors = ${
-            face.neighbors.map(f => f.id).join(", ")
-        }`
+      `Face ${face.id}: neighbors = ${face.neighbors.map(f => f.id).join(", ")
+      }`
     );
-}
+  }
 });

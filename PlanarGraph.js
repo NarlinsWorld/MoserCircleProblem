@@ -109,6 +109,28 @@ class Face {
         this.edges = [];
         this.neighbors = [];
         this.color = -1;
+
+        this.displayColor = color(
+            random(255),
+            random(255),
+            random(255)
+        );
+
+        this.graphColor = -1;
+    }
+     static palette = null;
+
+    draw() {
+        push();
+         noStroke();      // <---- important
+        fill(this.displayColor);
+
+        beginShape();
+        for (const v of this.vertices){
+            vertex(v.x, v.y); //vertex is  a call to p5js
+        }
+        endShape(CLOSE);
+        pop();
     }
 
     toString() {
@@ -188,9 +210,30 @@ function traceAllFaces() {
     //return faces;
 }
 
+// function buildDualGraph() {
+//     for (const face of faces) {
+//         face.neighbors = [];
+//         for (const edge of face.edges) {
+//             face.addNeighbor(edge.twin.face);
+//         }
+//     }
+// }
+
+function buildDualGraph() {
+    for (const face of faces)
+        face.neighbors = [];
+    for (const face of faces) {
+        for (const edge of face.edges) {
+            const other = edge.twin.face;
+            // Don't connect to the exterior.
+            if (!faces.includes(other))
+                continue;
+            face.addNeighbor(other);
+        }
+    }
+}
 
 
-/* REMOVE THE EXTERIOR */
 
 //polygon area per shoeString method
 function area(face) {
@@ -220,12 +263,12 @@ const extFace = () => {
 }
 
 
-function buildDualGraph() {
-    for (const face of faces) {
-        face.neighbors = [];
-        for (const edge of face.edges) {
-            face.addNeighbor(edge.twin.face);
-        }
-    }
-}
 
+/* REMOVE THE EXTERIOR */
+function removeExterior() {
+    exteriorFace = extFace();
+    faces = faces.filter(face => face !== exteriorFace);
+    console.log(
+        `Removed exterior face ${exteriorFace.id}`
+    );
+}
