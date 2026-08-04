@@ -53,35 +53,40 @@ document.getElementById("clearr").addEventListener("click", () => {
 document.getElementById("numPts").addEventListener("change", change_numPts); //sets the number of points
 
 
-document.getElementById("toggleTXT").onclick=()=>{
-    showVertexIds=!showVertexIds;
-    updateButton("toggleTXT",showVertexIds);
+document.getElementById("toggleTXT").onclick = () => {
+  showVertexIds = !showVertexIds;
+  updateButton("toggleTXT", showVertexIds);
 };
 
-document.getElementById("togglePts").onclick=()=>{
-    showVertices=!showVertices;
-    updateButton("togglePts",showVertices);
+document.getElementById("togglePts").onclick = () => {
+  showVertices = !showVertices;
+  updateButton("togglePts", showVertices);
 };
 
-document.getElementById("toggleColor").addEventListener("click",()=>{
-    showFaceFill = !showFaceFill;
-    updateButton("toggleColor",showFaceFill);
+document.getElementById("toggleColor").addEventListener("click", () => {
+  showFaceFill = !showFaceFill;
+  updateButton("toggleColor", showFaceFill);
 });
 
-document.getElementById("toggleSegs").onclick=()=>{
-    showSegments=!showSegments;
-    updateButton("toggleSegs",showSegments);
+document.getElementById("toggleSegs").onclick = () => {
+  showSegments = !showSegments;
+  updateButton("toggleSegs", showSegments);
 };
 
-function updateButton(id,state){
-    const b=document.getElementById(id);
-    if(state){
-        b.style.backgroundColor="rgb(1,254,1)";
-        b.style.color="black";
-    }else{
-        b.style.backgroundColor="red";
-        b.style.color="white";
-    }
+document.getElementById("toggleFaceIDs").onclick = () => {
+  showFaceIDs = !showFaceIDs;
+  updateButton("toggleFaceIDs", showFaceIDs);
+}
+
+function updateButton(id, state) {
+  const b = document.getElementById(id);
+  if (state) {
+    b.style.backgroundColor = "rgb(1,254,1)";
+    b.style.color = "black";
+  } else {
+    b.style.backgroundColor = "red";
+    b.style.color = "white";
+  }
 }
 
 
@@ -399,5 +404,33 @@ document.getElementById("seeNeighbors").addEventListener("click", () => {
       `Face ${face.id}: neighbors = ${face.neighbors.map(f => f.id).join(", ")
       }`
     );
+  }
+});
+
+document.getElementById("check_isSafe").addEventListener("click", () => {
+  for (const face of faces) {
+    const safe = isSafe(face, face.graphColor);
+    console.log(
+      `Face ${face.id}   graphColor = ${face.graphColor}   ${safe ? "SAFE" : "*** CONFLICT ***"}`
+    );
+    console.log(
+      `Face ${face.id}: neighbors = ${face.neighbors.map(n => n.id).join(", ")}`);
+  }
+});
+
+document.getElementById("colorFaceTester").addEventListener("click", () => {
+   recursiveCalls = 0;
+  faces.sort(
+    (a, b) => b.neighbors.length - a.neighbors.length
+);
+  colorFace(0);
+  console.log(`Total recursive calls = ${recursiveCalls}`);
+  for (const face of faces) {
+    // console.log(
+    //   `Face ${face.id}  color=${face.graphColor}  ${isSafe(face, face.graphColor)
+    //     ? "SAFE"
+    //     : "CONFLICT"
+    //   }`
+    // );
   }
 });

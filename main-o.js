@@ -29,14 +29,16 @@ let showFaceFill = true;
 let showSegments = true;
 let showVertices = true;
 let showVertexIds = true;
+let showFaceIDs = true;
+let recursiveCalls = 0;
 
 function setup() {
   const cnvs = createCanvas(400, 400);
   Face.palette = [
-    color(255,120,120),
-    color(120,255,120),
-    color(120,120,255),
-    color(255,255,120)
+    color(255,0,0),
+    color(0,255,0),
+    color(0,255,255),
+    color(255,0,255)
 ];
   cnvs.parent('cvs');
   create_n_Points(n); //When points are created, segments are too.
@@ -54,16 +56,22 @@ function draw() {
 
   //now draw the graph edges over the top of it.
   noFill();
-  circle(width / 2, height / 2, 2 * r); //the big circle
-
   stroke('black');
   strokeWeight(1)
+  circle(width / 2, height / 2, 2 * r); //the big circle
+
+  
 
   if (showSegments){
     drawSegments();
   }
  
     plotAllVertices();
+
+  if (showFaceIDs) {
+    for (const face of faces)
+        face.drawId();
+}
 
 }
 

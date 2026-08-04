@@ -1,3 +1,4 @@
+
 class Vertex {
     constructor(id, x, y) {
         this.id = id;
@@ -108,29 +109,52 @@ class Face {
         this.vertices = [];
         this.edges = [];
         this.neighbors = [];
-        this.color = -1;
+        this.graphColor = -1;
+        this.labelX = 0;
+        this.labelY = 0;
 
         this.displayColor = color(
             random(255),
             random(255),
             random(255)
         );
-
-        this.graphColor = -1;
     }
-     static palette = null;
+    static palette = null;
+
+    computeCentroid() { // more like an average spot
+        let sx = 0;
+        let sy = 0;
+        for (const v of this.vertices) {
+            sx += v.x;
+            sy += v.y;
+        }
+        this.labelX = sx / this.vertices.length;
+        this.labelY = sy / this.vertices.length;
+    }
 
     draw() {
         push();
-         noStroke();      // <---- important
-        fill(this.displayColor);
+        noStroke();      // <---- important
+        //fill(this.displayColor);
+        if (this.graphColor === -1)
+            fill(this.displayColor);
+        else
+            fill(Face.palette[this.graphColor]);
 
         beginShape();
-        for (const v of this.vertices){
+        for (const v of this.vertices) {
             vertex(v.x, v.y); //vertex is  a call to p5js
         }
         endShape(CLOSE);
         pop();
+    }
+
+    drawId() {
+
+        writeIndexNumber(
+            this.labelX,
+            this.labelY,
+            this.id); //the text to write   
     }
 
     toString() {
@@ -188,6 +212,7 @@ function traceFace(start) {
         face.edges.push(e);
         e = nextEdge(e);
     } while (e !== start);
+    face.computeCentroid();
     return face;
 }
 
@@ -210,14 +235,7 @@ function traceAllFaces() {
     //return faces;
 }
 
-// function buildDualGraph() {
-//     for (const face of faces) {
-//         face.neighbors = [];
-//         for (const edge of face.edges) {
-//             face.addNeighbor(edge.twin.face);
-//         }
-//     }
-// }
+
 
 function buildDualGraph() {
     for (const face of faces)
@@ -271,4 +289,40 @@ function removeExterior() {
     console.log(
         `Removed exterior face ${exteriorFace.id}`
     );
+}
+
+function isSafe(face, color) {
+    for (const neighbor of face.neighbors) {
+        if (neighbor.graphColor === color) {
+            return false;
+        }
+    }
+    return true;
+}
+
+function colorFace(index) {
+    recursiveCalls++;
+
+    if (recursiveCalls % 10000 === 0) {
+        console.log(`Calls = ${recursiveCalls}`);
+    }
+    if (index === faces.length) { return true; }
+    const face = faces[index]; //the recursion will pick the next face
+    if (face.graphColor !== -1) {
+        return colorFace(index + 1);
+    }
+    for (let c = 0; c < 4; c++) {
+        if (isSafe(face, c)) {
+            face.graphColor = c;
+            // console.log(
+            //     `Assigned color ${c} to Face ${face.id}`
+            // );
+            if (colorFace(index + 1))
+                return true;
+            //recursion failed
+            face.graphColor = -1;
+            console.log(`Backtracking from Face ${face.id}`);
+        }
+    }
+    return false;
 }
